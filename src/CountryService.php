@@ -76,6 +76,7 @@ final class CountryService
         $input = trim($input);
 
         if (str_contains($input, '-')) {
+            // 按第一个连字符分割：UY-UY-AR → country=UY, province=UY-AR（支持 ISO 3166-2 省份代码含连字符）
             $parts = explode('-', $input, 2);
             $countryCode = strtoupper(trim($parts[0]));
             $provinceCode = trim($parts[1] ?? '');

@@ -14,6 +14,11 @@ final class CountryServiceTest extends TestCase
 {
     private CountryService $service;
 
+    /** 
+     * 验证 getCountries 返回国家列表且包含中国
+     * 
+     * @return void
+     */
     public function testGetCountries(): void
     {
         $countries = $this->service->getCountries();
@@ -32,6 +37,11 @@ final class CountryServiceTest extends TestCase
         $this->assertSame('China', $cn->name);
     }
 
+    /** 
+     * 验证 getProvinces 能获取有效国家的省份，无效国家返回空数组
+     * 
+     * @return void
+     */
     public function testGetProvinces(): void
     {
         $provincesCN = $this->service->getProvinces('CN');
@@ -41,6 +51,11 @@ final class CountryServiceTest extends TestCase
         $this->assertSame([], $provincesXX);
     }
 
+    /** 
+     * 验证 getProvinces 国家代码大小写不敏感
+     * 
+     * @return void
+     */
     public function testGetProvincesCaseInsensitive(): void
     {
         $provincesLower = $this->service->getProvinces('cn');
@@ -49,6 +64,11 @@ final class CountryServiceTest extends TestCase
         $this->assertEquals($provincesLower, $provincesUpper);
     }
 
+    /** 
+     * 验证 resolve 仅国家代码时返回 CountryResolveResult
+     * 
+     * @return void
+     */
     public function testResolveCountryOnly(): void
     {
         $result = $this->service->resolve('CN');
@@ -59,6 +79,11 @@ final class CountryServiceTest extends TestCase
         $this->assertNotEmpty($result->provinces);
     }
 
+    /** 
+     * 验证 resolve 国家-省份代码（如 CN-GD）时返回 CountryProvinceResolveResult
+     * 
+     * @return void
+     */
     public function testResolveCountryProvince(): void
     {
         $result = $this->service->resolve('CN-GD');
@@ -70,6 +95,27 @@ final class CountryServiceTest extends TestCase
         $this->assertSame('GD', $result->provinceCode);
     }
 
+    /** 
+     * 验证 resolve 国家-省份代码（如 UY-UY-AR）时，省份代码含连字符的 ISO 3166-2 格式能正确解析
+     * 
+     * @return void
+     */
+    public function testResolveCountryProvinceWithHyphenInProvinceCode(): void
+    {
+        $result = $this->service->resolve('UY-UY-AR');
+
+        $this->assertInstanceOf(CountryProvinceResolveResult::class, $result);
+        $this->assertSame('Uruguay', $result->country);
+        $this->assertSame('UY', $result->countryCode);
+        $this->assertSame('Artigas', $result->province);
+        $this->assertSame('UY-AR', $result->provinceCode);
+    }
+
+    /** 
+     * 验证 resolve 国家-省份代码大小写不敏感
+     * 
+     * @return void
+     */
     public function testResolveCountryProvinceCaseInsensitive(): void
     {
         $resultLower = $this->service->resolve('cn-gd');
@@ -82,18 +128,33 @@ final class CountryServiceTest extends TestCase
         $this->assertSame($resultLower->provinceCode, $resultUpper->provinceCode);
     }
 
+    /** 
+     * 验证 resolve 无效国家代码时返回 null
+     * 
+     * @return void
+     */
     public function testResolveInvalidCountry(): void
     {
         $result = $this->service->resolve('XX');
         $this->assertNull($result);
     }
 
+    /** 
+     * 验证 resolve 有效国家但无效省份代码时返回 null
+     * 
+     * @return void
+     */
     public function testResolveInvalidProvince(): void
     {
         $result = $this->service->resolve('CN-XX');
         $this->assertNull($result);
     }
 
+    /** 
+     * 验证 resolve 无效格式（如纯文本）时返回 null
+     * 
+     * @return void
+     */
     public function testResolveInvalidProvinceCode(): void
     {
         $result = $this->service->resolve('INVALID');
