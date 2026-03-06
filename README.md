@@ -4,6 +4,8 @@ PHP 8.1+ 国家/省份查询库，数据源自 [Shopify Country Service](https:/
 
 ## 安装
 
+通过 [Packagist](https://packagist.org/packages/universal-packages/country-service) 安装：
+
 ```bash
 composer require universal-packages/country-service
 ```
@@ -40,3 +42,7 @@ $result = $service->resolve('CN-GD');  // China / Guangdong (GD)
 ## 数据更新
 
 GitHub Actions 每周一自动执行 `sync-locale` 和 `fetch-countries`，并提交变更。
+
+## 许可证
+
+[MIT License](LICENSE)

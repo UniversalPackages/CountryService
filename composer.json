@@ -1,6 +1,8 @@
 {
     "name": "universal-packages/country-service",
+    "description": "PHP 8.1+ 国家/省份查询库，数据源自 Shopify Country Service",
     "type": "library",
+    "license": "MIT",
     "require": {
         "php": ">=8.1"
     },
