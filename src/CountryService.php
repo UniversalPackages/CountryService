@@ -4,17 +4,30 @@ declare(strict_types=1);
 
 namespace UniversalPackages\CountryService;
 
+use JsonException;
 use RuntimeException;
 use UniversalPackages\CountryService\DTO\Country;
 use UniversalPackages\CountryService\DTO\CountryProvinceResolveResult;
 use UniversalPackages\CountryService\DTO\CountryResolveResult;
 use UniversalPackages\CountryService\DTO\Province;
 
+/**
+ * @phpstan-type CountryCode string
+ * @phpstan-type NormalizedCountryName string
+ * @phpstan-type CountryByCodeMap array<CountryCode, Country>
+ * @phpstan-type CountryCodeByNameMap array<NormalizedCountryName, CountryCode>
+ */
 final class CountryService
 {
-    /** @var array<string, Country>|null */
+    /** @var CountryByCodeMap|null 国家主索引：countryCode => Country */
     private ?array $countriesByCode = null;
+    /** @var CountryCodeByNameMap|null 名称索引：normalizedName => countryCode */
+    private ?array $countryCodesByNormalizedName = null;
 
+    /**
+     * @param SupportedLocale $locale 数据所使用的 locale
+     * @param string|null $dataDir 数据目录，默认使用项目内 data 目录
+     */
     public function __construct(
         private readonly SupportedLocale $locale = SupportedLocale::EN_US,
         private ?string                  $dataDir = null,
@@ -24,6 +37,8 @@ final class CountryService
     }
 
     /**
+     * 返回当前 locale 下的全部国家对象。
+     *
      * @return Country[]
      */
     public function getCountries(): array
@@ -32,6 +47,12 @@ final class CountryService
         return array_values($this->countriesByCode);
     }
 
+    /**
+     * 加载并缓存国家数据（按国家代码索引）。
+     *
+     * 首次调用时读取 JSON，后续调用直接复用内存数据。
+     * 同时会使名称索引失效，确保派生索引与主数据一致。
+     */
     private function loadData(): void
     {
         if ($this->countriesByCode !== null) {
@@ -44,10 +65,13 @@ final class CountryService
             throw new RuntimeException("Failed to read data file: {$filePath}");
         }
 
-        $data = json_decode($json, true);
-        if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+        try {
+            $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
             throw new RuntimeException(
-                'Failed to decode JSON: ' . json_last_error_msg()
+                $e->getMessage(),
+                $e->getCode(),
+                $e
             );
         }
 
@@ -57,9 +81,13 @@ final class CountryService
             $country = Country::fromArray(is_array($countryData) ? $countryData : []);
             $this->countriesByCode[strtoupper($country->code)] = $country;
         }
+        $this->countryCodesByNormalizedName = null;
     }
 
     /**
+     * 根据国家代码获取省份列表，代码匹配不区分大小写。
+     *
+     * @param string $countryCode 国家代码（例如 CN）
      * @return Province[]
      */
     public function getProvinces(string $countryCode): array
@@ -67,9 +95,66 @@ final class CountryService
         $this->loadData();
         $countryCode = strtoupper($countryCode);
         $country = $this->countriesByCode[$countryCode] ?? null;
+
         return $country !== null ? $country->provinces : [];
     }
 
+    /**
+     * 根据国家名精确匹配国家对象（不区分大小写，自动 trim）。
+     *
+     * @param string $countryName 国家名（例如 China）
+     */
+    public function getCountryByName(string $countryName): ?Country
+    {
+        $this->loadData();
+        $targetName = $this->normalizeCountryName($countryName);
+        if ($targetName === '') {
+            return null;
+        }
+
+        $this->loadCountryNameIndex();
+        $countryCode = $this->countryCodesByNormalizedName[$targetName] ?? null;
+        if ($countryCode === null) {
+            return null;
+        }
+
+        return $this->countriesByCode[$countryCode] ?? null;
+    }
+
+    /**
+     * 懒加载名称索引：normalizedName => countryCode。
+     *
+     * 为节省内存，索引仅保存国家代码，再通过主索引回查 Country 对象。
+     */
+    private function loadCountryNameIndex(): void
+    {
+        if ($this->countryCodesByNormalizedName !== null) {
+            return;
+        }
+
+        $this->countryCodesByNormalizedName = [];
+        foreach ($this->countriesByCode as $countryCode => $country) {
+            $normalizedName = $this->normalizeCountryName($country->name);
+            if ($normalizedName === '') {
+                continue;
+            }
+            $this->countryCodesByNormalizedName[$normalizedName] = $countryCode;
+        }
+    }
+
+    /**
+     * 标准化国家名，用于建立和查询名称索引。
+     */
+    private function normalizeCountryName(string $countryName): string
+    {
+        return strtolower(trim($countryName));
+    }
+
+    /**
+     * 解析输入：
+     * - 国家代码（如 CN）返回 CountryResolveResult
+     * - 国家-省份代码（如 CN-GD / UY-UY-AR）返回 CountryProvinceResolveResult
+     */
     public function resolve(string $input): CountryResolveResult|CountryProvinceResolveResult|null
     {
         $this->loadData();

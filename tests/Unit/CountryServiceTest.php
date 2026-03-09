@@ -64,6 +64,34 @@ final class CountryServiceTest extends TestCase
         $this->assertEquals($provincesLower, $provincesUpper);
     }
 
+    /**
+     * 验证 getCountryByName 可按国家名查询并返回对应对象
+     *
+     * @return void
+     */
+    public function testGetCountryByName(): void
+    {
+        $country = $this->service->getCountryByName('China');
+        $countryWithSpaces = $this->service->getCountryByName('  china  ');
+
+        $this->assertNotNull($country);
+        $this->assertSame('CN', $country->code);
+        $this->assertSame('China', $country->name);
+        $this->assertNotNull($countryWithSpaces);
+        $this->assertSame('CN', $countryWithSpaces->code);
+    }
+
+    /**
+     * 验证 getCountryByName 查询不存在国家时返回 null
+     *
+     * @return void
+     */
+    public function testGetCountryByNameInvalid(): void
+    {
+        $country = $this->service->getCountryByName('NotARealCountry');
+        $this->assertNull($country);
+    }
+
     /** 
      * 验证 resolve 仅国家代码时返回 CountryResolveResult
      * 
