@@ -76,14 +76,25 @@ function parseArgs(array $argv): array
 {
     $locale = 'EN_US';
     $outputDir = 'data/';
+    $hasLocaleBeenSet = false;
 
-    for ($i = 1; $i < count($argv); $i++) {
+    for ($i = 1, $iMax = count($argv); $i < $iMax; $i++) {
         if ($argv[$i] === '--locale' && isset($argv[$i + 1])) {
             $locale = $argv[$i + 1];
+            $hasLocaleBeenSet = true;
             $i++;
+        } elseif (str_starts_with($argv[$i], '--locale=')) {
+            $locale = substr($argv[$i], strlen('--locale='));
+            $hasLocaleBeenSet = true;
         } elseif ($argv[$i] === '--output-dir' && isset($argv[$i + 1])) {
             $outputDir = rtrim($argv[$i + 1], '/') . '/';
             $i++;
+        } elseif (str_starts_with($argv[$i], '--output-dir=')) {
+            $outputDir = rtrim(substr($argv[$i], strlen('--output-dir=')), '/') . '/';
+        } elseif (!str_starts_with($argv[$i], '--') && !$hasLocaleBeenSet) {
+            // Allow positional locale, e.g. `composer fetch-countries ZH_CN`.
+            $locale = $argv[$i];
+            $hasLocaleBeenSet = true;
         }
     }
 
