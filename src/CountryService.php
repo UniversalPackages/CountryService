@@ -154,8 +154,11 @@ final class CountryService
      * 解析输入：
      * - 国家代码（如 CN）返回 CountryResolveResult
      * - 国家-省份代码（如 CN-GD / UY-UY-AR）返回 CountryProvinceResolveResult
+     *
+     * @param string $input 国家代码或国家-省份代码
+     * @param bool $fallbackToCountry 当省份不存在时，是否降级返回国家信息（默认 false）
      */
-    public function resolve(string $input): CountryResolveResult|CountryProvinceResolveResult|null
+    public function resolve(string $input, bool $fallbackToCountry = false): CountryResolveResult|CountryProvinceResolveResult|null
     {
         $this->loadData();
         $input = trim($input);
@@ -178,6 +181,14 @@ final class CountryService
                         provinceCode: $province->code,
                     );
                 }
+            }
+            // 省份不存在：根据配置决定是否降级返回国家信息
+            if ($fallbackToCountry) {
+                return new CountryResolveResult(
+                    country: $country->name,
+                    countryCode: $country->code,
+                    provinces: $country->provinces,
+                );
             }
             return null;
         }

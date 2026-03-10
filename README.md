@@ -34,16 +34,20 @@ $result = $service->resolve('CN');  // China, 31 provinces
 
 // 解析：国家-省份代码 → 国家名 + 省份名
 $result = $service->resolve('CN-GD');  // China / Guangdong (GD)
+
+// 省份不存在时的降级处理
+$result = $service->resolve('CN-XX');                         // null（默认行为）
+$result = $service->resolve('CN-XX', fallbackToCountry: true); // 返回国家信息（China + 省份列表）
 ```
 
 ## API 概览
 
-| 方法                                                                                 | 说明                                       |
-|------------------------------------------------------------------------------------|------------------------------------------|
-| `getCountries(): Country[]`                                                        | 返回当前 locale 的全部国家                        |
-| `getProvinces(string $countryCode): Province[]`                                    | 根据国家代码获取省份（大小写不敏感）                       |
-| `getCountryByName(string $countryName): ?Country`                                  | 根据国家名精确匹配国家对象（大小写不敏感，自动 trim）            |
-| `resolve(string $input): CountryResolveResult\|CountryProvinceResolveResult\|null` | 解析国家代码或国家-省份代码（支持 `UY-UY-AR` 这类省份代码含连字符） |
+| 方法                                                                                                | 说明                                                                                       |
+|---------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
+| `getCountries(): Country[]`                                                                       | 返回当前 locale 的全部国家                                                                        |
+| `getProvinces(string $countryCode): Province[]`                                                   | 根据国家代码获取省份（大小写不敏感）                                                                       |
+| `getCountryByName(string $countryName): ?Country`                                                 | 根据国家名精确匹配国家对象（大小写不敏感，自动 trim）                                                            |
+| `resolve(string $input, bool $fallbackToCountry = false): CountryResolveResult\|CountryProvinceResolveResult\|null` | 解析国家代码或国家-省份代码（支持 `UY-UY-AR` 这类省份代码含连字符）。`fallbackToCountry` 为 true 时，省份不存在会降级返回国家信息 |
 
 ## 性能说明
 
