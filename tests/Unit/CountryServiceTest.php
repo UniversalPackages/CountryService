@@ -179,18 +179,19 @@ final class CountryServiceTest extends TestCase
     }
 
     /** 
-     * 验证 resolve 有效国家但无效省份代码时，启用 fallbackToCountry 后返回国家信息
+     * 验证 resolve 有效国家但无效省份代码时，启用 allowInvalidProvince 后返回 CountryProvinceResolveResult（省份字段使用原始输入）
      * 
      * @return void
      */
     public function testResolveInvalidProvinceWithFallback(): void
     {
-        $result = $this->service->resolve('CN-XX', fallbackToCountry: true);
+        $result = $this->service->resolve('CN-XX', allowInvalidProvince: true);
 
-        $this->assertInstanceOf(CountryResolveResult::class, $result);
+        $this->assertInstanceOf(CountryProvinceResolveResult::class, $result);
         $this->assertSame('China', $result->country);
         $this->assertSame('CN', $result->countryCode);
-        $this->assertNotEmpty($result->provinces);
+        $this->assertSame('XX', $result->province);
+        $this->assertSame('XX', $result->provinceCode);
     }
 
     /** 
