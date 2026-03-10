@@ -55,3 +55,9 @@ composer test           # 运行 PHPUnit
 - 命名空间：`UniversalPackages\CountryService`，DTO 在 `...\DTO`
 - 测试：`tests/Unit/` 与 `src/` 结构对应
 - 勿直接编辑 `src/SupportedLocale.php`，通过脚本重新生成
+
+## Release 约定
+
+- 每次创建 GitHub Release 时，`release notes` 使用中文简述（简短列出本次主要变更）。
+- `release notes` 必须保留并包含 `Full Changelog` 比较链接，格式为：
+  - `**Full Changelog**: [vX.Y.Z...vA.B.C](https://github.com/UniversalPackages/CountryService/compare/vX.Y.Z...vA.B.C)`
