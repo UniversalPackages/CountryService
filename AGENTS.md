@@ -11,11 +11,10 @@ PHP 8.1+ 国家/省份查询库，数据来自 Shopify Country Service GraphQL A
 ```
 ├── data/              # 按 locale 存储的 JSON 数据（EN_US.json 等）
 ├── scripts/           # CLI 脚本
-│   ├── sync-supported-locale.php   # 从 GraphQL schema 同步 SupportedLocale 枚举
 │   └── fetch-countries.php         # 拉取国家/省份数据
 ├── src/
 │   ├── CountryService.php          # 主服务类
-│   ├── SupportedLocale.php         # 枚举（自动生成，勿手改）
+│   ├── DataLocale.php              # 枚举（由 data 目录文件名映射）
 │   └── DTO/
 │       ├── Country.php
 │       ├── Province.php
@@ -27,10 +26,10 @@ PHP 8.1+ 国家/省份查询库，数据来自 Shopify Country Service GraphQL A
 
 ## 核心逻辑
 
-- **CountryService**：构造函数接收 `SupportedLocale` 和可选 `dataDir`，数据文件路径为 `{dataDir}/{locale->value}.json`
+- **CountryService**：构造函数接收 `DataLocale` 和可选 `dataDir`，数据文件路径为 `{dataDir}/{locale->value}.json`
 - **resolve()**：输入不含 `-` 按国家代码；含 `-` 按 `CountryCode-ProvinceCode` 解析（如 `CN-GD`）
 - **大小写**：国家/省份代码统一 `strtoupper` 匹配
-- **SupportedLocale**：由 `sync-supported-locale.php` 从 GraphQL introspection 生成，修改需改脚本后重新执行
+- **DataLocale**：由 `data/` 目录现有 JSON 文件名对应维护
 
 ## 修改指南
 
@@ -44,7 +43,6 @@ PHP 8.1+ 国家/省份查询库，数据来自 Shopify Country Service GraphQL A
 ## 命令
 
 ```bash
-composer sync-locale    # 同步 SupportedLocale.php
 composer fetch-countries # 拉取 data/EN_US.json
 composer test           # 运行 PHPUnit
 ```
@@ -54,7 +52,7 @@ composer test           # 运行 PHPUnit
 - PHP 8.1+，`declare(strict_types=1)`
 - 命名空间：`UniversalPackages\CountryService`，DTO 在 `...\DTO`
 - 测试：`tests/Unit/` 与 `src/` 结构对应
-- 勿直接编辑 `src/SupportedLocale.php`，通过脚本重新生成
+- `src/DataLocale.php` 需与 `data/` 目录中的 locale 文件保持一致
 
 ## Release 约定
 

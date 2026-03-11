@@ -10,7 +10,6 @@
         "phpunit/phpunit": "^9.6 | ^10.0"
     },
     "scripts": {
-        "sync-locale": "php scripts/sync-supported-locale.php",
         "fetch-countries": "php scripts/fetch-countries.php",
         "test": "phpunit"
     },

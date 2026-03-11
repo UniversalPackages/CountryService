@@ -14,9 +14,9 @@ composer require universal-packages/country-service
 
 ```php
 use UniversalPackages\CountryService\CountryService;
-use UniversalPackages\CountryService\SupportedLocale;
+use UniversalPackages\CountryService\DataLocale;
 
-$service = new CountryService(SupportedLocale::EN_US);
+$service = new CountryService(DataLocale::EN_US);
 
 // 国家列表
 $countries = $service->getCountries();
@@ -59,13 +59,12 @@ $result = $service->resolve('CN-XX', allowInvalidProvince: true); // CountryProv
 
 | 命令                         | 说明                                     |
 |----------------------------|----------------------------------------|
-| `composer sync-locale`     | 从 GraphQL schema 同步 SupportedLocale 枚举 |
 | `composer fetch-countries` | 拉取国家/省份数据                              |
 | `composer test`            | 运行测试                                   |
 
 ## 数据更新
 
-GitHub Actions 每周一自动执行 `sync-locale` 和 `fetch-countries`，并提交变更。
+GitHub Actions 每周一自动执行 `fetch-countries`，并提交变更。
 
 ## 许可证
 

@@ -6,9 +6,9 @@ namespace UniversalPackages\CountryService\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use UniversalPackages\CountryService\CountryService;
+use UniversalPackages\CountryService\DataLocale;
 use UniversalPackages\CountryService\DTO\CountryProvinceResolveResult;
 use UniversalPackages\CountryService\DTO\CountryResolveResult;
-use UniversalPackages\CountryService\SupportedLocale;
 
 final class CountryServiceTest extends TestCase
 {
@@ -208,6 +208,6 @@ final class CountryServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CountryService(SupportedLocale::EN_US);
+        $this->service = new CountryService(DataLocale::EN_US);
     }
 }

@@ -25,11 +25,11 @@ final class CountryService
     private ?array $countryCodesByNormalizedName = null;
 
     /**
-     * @param SupportedLocale $locale 数据所使用的 locale
+     * @param \UniversalPackages\CountryService\DataLocale $locale 数据所使用的 locale
      * @param string|null $dataDir 数据目录，默认使用项目内 data 目录
      */
     public function __construct(
-        private readonly SupportedLocale $locale = SupportedLocale::EN_US,
+        private readonly DataLocale $locale = DataLocale::EN_US,
         private ?string                  $dataDir = null,
     )
     {
