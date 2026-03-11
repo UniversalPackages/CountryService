@@ -25,16 +25,13 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Sync supported locale
-        run: php scripts/sync-supported-locale.php
-
       - name: Fetch countries
         run: php scripts/fetch-countries.php
 
       - name: Check for changes
         id: changes
         run: |
-          if [ -n "$(git status --porcelain data/ src/SupportedLocale.php 2>/dev/null)" ]; then
+          if [ -n "$(git status --porcelain data/ 2>/dev/null)" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "changed=false" >> $GITHUB_OUTPUT
@@ -45,6 +42,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/ src/SupportedLocale.php
-          git commit -m "chore: sync country data and SupportedLocale enum"
+          git add data/
+          git commit -m "chore: sync country data"
           git push
